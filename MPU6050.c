@@ -38,7 +38,7 @@ void MPU6050ReadAccel(void){
 
 void MPU6050ReadTemp(void){
 	MPU6050ReadRegister(MPU6050_TEMP_OUT_H, 2);
-	mpu->temp = (double)((mpu->buff[0] << 8 | mpu->buff[1]) / 340) + 36.53;
+	mpu->temp = ((((float)(mpu->buff[0] << 8 | mpu->buff[1])) / 340) + 36.53);
 	MPU6050BufferReset();
 }
 
@@ -50,7 +50,7 @@ void MPU6050ReadGyro(void){
 	MPU6050BufferReset();
 }
 
-void MPU6050ReadRegister(uint8_t address, uint16_t val){ // address kısmı pointer olabilir dikkat et
+void MPU6050ReadRegister(uint8_t address, uint16_t val){
 	mpu->buff[0] = address;
 	HAL_I2C_Master_Transmit(mpui2c, mpu->address, mpu->buff, 1, 100);
 	HAL_I2C_Master_Receive(mpui2c, mpu->address, mpu->buff, val, 100);
