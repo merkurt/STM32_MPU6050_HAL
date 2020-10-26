@@ -39,10 +39,10 @@ struct MPU6050{
 
 uint32_t MPU6050Init(I2C_HandleTypeDef *i2c, struct MPU6050 *mpu, uint8_t dlpf_cfg, uint8_t fs_sel, uint8_t afs_sel);
 void MPU6050Start(void);
-void MPU6050SettingsWrite(void);
 void MPU6050ReadAccel(void);
 void MPU6050ReadTemp(void);
 void MPU6050ReadGyro(void);
+void MPU6050WriteRegister(uint8_t address, uint8_t byte);
 void MPU6050ReadRegister(uint8_t address, uint16_t size);
 void MPU6050BufferReset(void);
 void MPU6050Check(void);
