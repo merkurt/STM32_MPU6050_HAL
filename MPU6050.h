@@ -23,6 +23,9 @@
 
 struct MPU6050{
     uint8_t address;
+    uint8_t DLPF_CFG;
+    uint8_t FS_SEL;		// GYRO_CONFIG 0:+-250/s 1:+-500/s 2:+-1000/s 3:2000/s
+    uint8_t AFS_SEL;	// ACCEL_CONFIG	0:+-2g	1:+-4g	2:+-8g	3:+-16g
     uint8_t check;
     int16_t accelX;
     int16_t accelY;
@@ -30,12 +33,13 @@ struct MPU6050{
     int16_t gyroX;
     int16_t gyroY;
     int16_t gyroZ;
-    double temp;
+    float temp;
     uint8_t buff[MPU6050_STRUCT_BUFFER_LEN]; // this buffer is for i2c, you must be sure reset all elements at initialize
 };
 
-uint32_t MPU6050Init(I2C_HandleTypeDef *i2c, struct MPU6050 *mpu);
+uint32_t MPU6050Init(I2C_HandleTypeDef *i2c, struct MPU6050 *mpu, uint8_t dlpf_cfg, uint8_t fs_sel, uint8_t afs_sel);
 void MPU6050Start(void);
+void MPU6050SettingsWrite(void);
 void MPU6050ReadAccel(void);
 void MPU6050ReadTemp(void);
 void MPU6050ReadGyro(void);

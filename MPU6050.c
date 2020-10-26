@@ -3,10 +3,13 @@
 I2C_HandleTypeDef *mpui2c;
 struct MPU6050 *mpu;
 
-uint32_t MPU6050Init(I2C_HandleTypeDef *i2cP, struct MPU6050 *mpuP){
+uint32_t MPU6050Init(I2C_HandleTypeDef *i2cP, struct MPU6050 *mpuP, uint8_t dlpf_cfg, uint8_t fs_sel, uint8_t afs_sel){
 	mpui2c = i2cP;
 	mpu = mpuP;
 	mpu->address = MPU6050_ADDRESS;
+	mpu->DLPF_CFG = dlpf_cfg;
+	mpu->FS_SEL = fs_sel;
+	mpu->AFS_SEL = afs_sel;
 	mpu->check = 0;
 	mpu->accelX = 0;
 	mpu->accelY = 0;
@@ -22,10 +25,26 @@ uint32_t MPU6050Init(I2C_HandleTypeDef *i2cP, struct MPU6050 *mpuP){
 }
 
 void MPU6050Start(void){
+	mpu->buff[0] = MPU6050_CONFIG;
+	mpu->buff[1] = mpu->DLPF_CFG;
+	HAL_I2C_Master_Transmit(mpui2c, mpu->address, mpu->buff, 2, 100);
+	MPU6050BufferReset();
+	mpu->buff[0] = MPU6050_GYRO_CONFIG;
+	mpu->buff[1] = mpu->FS_SEL << 3;
+	HAL_I2C_Master_Transmit(mpui2c, mpu->address, mpu->buff, 2, 100);
+	MPU6050BufferReset();
+	mpu->buff[0] = MPU6050_ACCEL_CONFIG;
+	mpu->buff[1] = mpu->AFS_SEL << 3;
+	HAL_I2C_Master_Transmit(mpui2c, mpu->address, mpu->buff, 2, 100);
+	MPU6050BufferReset();
 	mpu->buff[0] = MPU6050_PWR_MGMT_1;
 	mpu->buff[1] = 0;
 	HAL_I2C_Master_Transmit(mpui2c, mpu->address, mpu->buff, 2, 100);
 	MPU6050BufferReset();
+}
+
+void MPU6050SettingsWrite(void){
+	;
 }
 
 void MPU6050ReadAccel(void){
