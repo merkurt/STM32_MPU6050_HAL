@@ -3,13 +3,14 @@
 I2C_HandleTypeDef *mpui2c;
 struct MPU6050 *mpu;
 
-uint32_t MPU6050Init(I2C_HandleTypeDef *i2cP, struct MPU6050 *mpuP, uint8_t dlpf_cfg, uint8_t fs_sel, uint8_t afs_sel){
+uint32_t MPU6050Init(I2C_HandleTypeDef *i2cP, struct MPU6050 *mpuP, uint8_t dlpf_cfg, uint8_t fs_sel, uint8_t afs_sel, uint8_t clk_sel){
 	mpui2c = i2cP;
 	mpu = mpuP;
 	mpu->address = MPU6050_ADDRESS;
-	mpu->DLPF_CFG = dlpf_cfg;
-	mpu->FS_SEL = fs_sel;
-	mpu->AFS_SEL = afs_sel;
+	mpu->DLPF_CFG = dlpf_cfg & 0x07;
+	mpu->FS_SEL = fs_sel & 0x03;
+	mpu->AFS_SEL = afs_sel & 0x03;
+	mpu->CLK_SEL = clk_sel & 0x07;
 	mpu->check = 0;
 	mpu->accelX = 0;
 	mpu->accelY = 0;
@@ -28,10 +29,10 @@ void MPU6050Start(void){
 	MPU6050WriteRegister(MPU6050_CONFIG, mpu->DLPF_CFG);
 	MPU6050WriteRegister(MPU6050_GYRO_CONFIG, mpu->FS_SEL << 3);
 	MPU6050WriteRegister(MPU6050_ACCEL_CONFIG, mpu->AFS_SEL << 3);
-	MPU6050WriteRegister(MPU6050_PWR_MGMT_1, 0);
+	MPU6050WriteRegister(MPU6050_PWR_MGMT_1, mpu->CLK_SEL);
 }
 
-void MPU6050ReadAccel(void){
+void MPU6050UpdateAccel(void){
 	MPU6050ReadRegister(MPU6050_ACCEL_XOUT_H, 6);
 	mpu->accelX = mpu->buff[0] << 8 | mpu->buff[1];
 	mpu->accelY = mpu->buff[2] << 8 | mpu->buff[3];
@@ -39,13 +40,13 @@ void MPU6050ReadAccel(void){
 	MPU6050BufferReset();
 }
 
-void MPU6050ReadTemp(void){
+void MPU6050UpdateTemp(void){
 	MPU6050ReadRegister(MPU6050_TEMP_OUT_H, 2);
 	mpu->temp = ((((float)(mpu->buff[0] << 8 | mpu->buff[1])) / 340) + 36.53) / 10;
 	MPU6050BufferReset();
 }
 
-void MPU6050ReadGyro(void){
+void MPU6050UpdateGyro(void){
 	MPU6050ReadRegister(MPU6050_GYRO_XOUT_H, 6);
 	mpu->gyroX = mpu->buff[0] << 8 | mpu->buff[1];
 	mpu->gyroY = mpu->buff[2] << 8 | mpu->buff[3];
